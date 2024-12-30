@@ -1,0 +1,84 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Model {
+  id        String     @id @default(uuid())
+  name      String
+  provider  String     // e.g. "OpenAI", "Anthropic", "HuggingFace" or "Custom"
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  Experiment Experiment[]
+  testCaseResults TestCaseResults[] // Add this back-reference
+}
+
+model Experiment {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  systemPrompt String
+  modelId      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  model              Model               @relation(fields: [modelId], references: [id])
+  experimentTestCases ExperimentTestCases[]
+  testCaseResults    TestCaseResults[]
+}
+
+model TestCase {
+  id             String           @id @default(uuid())
+  inputMessage   String
+  expectedOutput String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  experimentTestCases ExperimentTestCases[]
+  graders             TestCaseGraders[]
+  testCaseResults     TestCaseResults[]
+}
+
+model ExperimentTestCases {
+  id           String   @id @default(uuid())
+  experimentId String
+  testCaseId   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  experiment Experiment @relation(fields: [experimentId], references: [id])
+  testCase   TestCase   @relation(fields: [testCaseId], references: [id])
+}
+
+model TestCaseGraders {
+  id           String   @id @default(uuid())
+  testCaseId   String
+  graderType   String   // e.g. "exact-match", "contains-keywords", etc.
+  graderConfig Json?    // Arbitrary config
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  testCase TestCase @relation(fields: [testCaseId], references: [id])
+}
+
+model TestCaseResults {
+  id             String   @id @default(uuid())
+  experimentId   String
+  testCaseId     String
+  modelId        String
+  responseText   String
+  responseTimeMs Int
+  graderType     String
+  score          Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  experiment Experiment @relation(fields: [experimentId], references: [id])
+  testCase   TestCase   @relation(fields: [testCaseId], references: [id])
+  model      Model      @relation(fields: [modelId], references: [id])
+}

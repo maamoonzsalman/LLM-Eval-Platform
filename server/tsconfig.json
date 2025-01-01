@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "target": "ES2019",        // ES2019 for modern async/await and JS features
+      "module": "CommonJS",      // Use CommonJS for require compatibility
+      "outDir": "./dist",        // Output directory for compiled JS files
+      "esModuleInterop": true,   // Interoperability with ES modules
+      "strict": true,            // Strict type-checking
+      "skipLibCheck": true       // Skip library type checking for faster builds
+    },
+    "include": ["src/**/*", "*.ts"],
+    "exclude": ["node_modules", "dist"]
+  }
+  

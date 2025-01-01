@@ -1,4 +1,5 @@
 "use strict";
+// eslint-disable-next-line no-undef
 const { callLLM } = require('./src/services/llmService');
 async function testLLMService() {
     try {

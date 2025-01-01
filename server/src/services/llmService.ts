@@ -62,24 +62,34 @@ async function callAnthropicChat(
   const url = 'https://api.anthropic.com/v1/complete';
   const prompt = `${systemPrompt}\n\nHuman: ${userMessage}\n\nAssistant:`;
   const maxTokens = 300;
-
-  const response = await axios.post(
-    url,
-    {
-      prompt,
-      model: modelName, // e.g., "claude-2"
-      max_tokens_to_sample: maxTokens,
-    },
-    {
-      headers: {
-        'x-api-key': anthropicApiKey!,
-        'Content-Type': 'application/json',
+  try {
+    const response = await axios.post(
+      url,
+      {
+        prompt,
+        model: modelName, // e.g., "claude-2"
+        max_tokens_to_sample: maxTokens,
       },
-    }
-  );
+      {
+        headers: {
+          'x-api-key': anthropicApiKey!,
+          'Content-Type': 'application/json',
+          'anthropic-version': '2023-06-01', // Add the correct version here
+        },
+      }
+    );
 
-  return response.data.completion || '';
+    return response.data.completion || '';
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios Error:', error.response?.data || error.message);
+    } else {
+      console.error('Unknown Error:', error);
+    }
+    throw error; // Re-throw for further handling
+  }
 }
+
 
 // HuggingFace Chat Completion
 async function callHuggingFaceChat(
@@ -90,15 +100,34 @@ async function callHuggingFaceChat(
   const maxTokens = 300;
   const url = `https://api-inference.huggingface.co/models/${modelName}`;
   const payload = {
-    inputs: `${systemPrompt}\nUser: ${userMessage}`,
+    inputs: `${systemPrompt}\nUser: ${userMessage}\nAssistant:`,
     parameters: {
       max_length: maxTokens,
+      stop: ["User:"],
     },
   };
   const headers = {
     Authorization: `Bearer ${llama2ApiKey!}`,
   };
 
-  const response = await axios.post(url, payload, { headers });
-  return response.data?.[0]?.generated_text || '';
+  try {
+    const response = await axios.post(url, payload, { headers });
+    const rawText = response.data?.[0]?.generated_text || '';
+
+    // Clean response: Extract only assistant lines
+    const cleanText = rawText
+      .split('\n')
+      .filter((line: string) => line.startsWith('Assistant:'))
+      .map((line: string) => line.replace('Assistant:', '').trim())
+      .join(' ');
+
+    return cleanText;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios Error:', error.response?.data || error.message);
+    } else {
+      console.error('Unknown Error:', error);
+    }
+    throw error; // Re-throw for further handling
+  }
 }

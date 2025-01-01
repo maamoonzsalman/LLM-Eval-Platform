@@ -40,12 +40,14 @@ async function callOpenAiChat(
   systemPrompt: string,
   userMessage: string
 ): Promise<string> {
+  const maxTokens = 300
   const response = await openai.chat.completions.create({
     model: modelName, // e.g., "gpt-4"
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userMessage },
     ],
+    max_tokens: maxTokens
   });
 
   return response.choices[0]?.message?.content || '';
@@ -59,7 +61,7 @@ async function callAnthropicChat(
 ): Promise<string> {
   const url = 'https://api.anthropic.com/v1/complete';
   const prompt = `${systemPrompt}\n\nHuman: ${userMessage}\n\nAssistant:`;
-  const maxTokens = 1000;
+  const maxTokens = 300;
 
   const response = await axios.post(
     url,
@@ -85,9 +87,13 @@ async function callHuggingFaceChat(
   systemPrompt: string,
   userMessage: string
 ): Promise<string> {
+  const maxTokens = 300;
   const url = `https://api-inference.huggingface.co/models/${modelName}`;
   const payload = {
     inputs: `${systemPrompt}\nUser: ${userMessage}`,
+    parameters: {
+      max_length: maxTokens,
+    },
   };
   const headers = {
     Authorization: `Bearer ${llama2ApiKey!}`,

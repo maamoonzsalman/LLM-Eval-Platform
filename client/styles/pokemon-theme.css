@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 210 40% 96.1%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --primary: 201 96% 32%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 358 68% 54%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 47 95% 57%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+ 
+    --radius: 0.5rem;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.pokemon-card {
+  @apply bg-card rounded-lg shadow-lg border-2 border-primary/50 relative overflow-hidden transition-transform hover:scale-105;
+}
+
+.pokemon-card::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 opacity-50;
+}
+
+.pokemon-input {
+  @apply bg-muted border-primary/20 focus:border-primary/50 focus:ring-primary/20 text-foreground rounded-md;
+}
+
+.pokemon-button {
+  @apply bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold py-2 px-4 rounded-full shadow-md transition-all hover:shadow-lg;
+}
+
+.pokemon-title {
+  @apply font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent;
+}
+

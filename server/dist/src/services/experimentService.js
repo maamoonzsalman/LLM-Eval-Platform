@@ -8,7 +8,8 @@ const prisma_1 = __importDefault(require("../config/prisma"));
 const llmService_1 = require("./llmService");
 const gradingService_1 = require("./gradingService");
 async function runExperiment(experimentId) {
-    // 1) fetch experiment with model + test cases
+    var _a;
+    // 1) Fetch experiment with model + test cases
     const experiment = await prisma_1.default.experiment.findUnique({
         where: { id: experimentId },
         include: {
@@ -30,6 +31,8 @@ async function runExperiment(experimentId) {
     // 2) For each test case
     for (const etc of experiment.experimentTestCases) {
         const testCase = etc.testCase;
+        // Ensure expectedOutput is defined or provide a default value
+        const expectedOutput = (_a = testCase.expectedOutput) !== null && _a !== void 0 ? _a : '';
         // Call the LLM
         const startTime = Date.now();
         const responseText = await (0, llmService_1.callLLM)(provider, modelName, systemPrompt, testCase.inputMessage);
@@ -41,7 +44,7 @@ async function runExperiment(experimentId) {
                 graderType: grader.graderType,
                 graderConfig: grader.graderConfig,
                 responseText,
-                expectedOutput: testCase.expectedOutput,
+                expectedOutput,
                 inputMessage: testCase.inputMessage,
             });
             await prisma_1.default.testCaseResults.create({

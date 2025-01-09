@@ -3,7 +3,7 @@ import { callLLM } from './llmService';
 import { gradeResponse } from './gradingService';
 
 export async function runExperiment(experimentId: string) {
-  // 1) fetch experiment with model + test cases
+  // 1) Fetch experiment with model + test cases
   const experiment = await prisma.experiment.findUnique({
     where: { id: experimentId },
     include: {
@@ -17,6 +17,7 @@ export async function runExperiment(experimentId: string) {
       },
     },
   });
+
   if (!experiment) throw new Error('Experiment not found');
 
   const { model } = experiment;
@@ -26,6 +27,9 @@ export async function runExperiment(experimentId: string) {
   // 2) For each test case
   for (const etc of experiment.experimentTestCases) {
     const testCase = etc.testCase;
+
+    // Ensure expectedOutput is defined or provide a default value
+    const expectedOutput = testCase.expectedOutput ?? '';
 
     // Call the LLM
     const startTime = Date.now();
@@ -40,7 +44,7 @@ export async function runExperiment(experimentId: string) {
         graderType: grader.graderType,
         graderConfig: grader.graderConfig,
         responseText,
-        expectedOutput: testCase.expectedOutput,
+        expectedOutput,
         inputMessage: testCase.inputMessage,
       });
 
